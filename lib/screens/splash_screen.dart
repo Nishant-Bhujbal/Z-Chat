@@ -1,6 +1,9 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:zchat/api/apis.dart';
+import 'package:zchat/auth/login_screen.dart';
 import 'package:zchat/screens/home_screen.dart';
 
 import '../main.dart';
@@ -25,9 +28,17 @@ class _SplashScreenState extends State<SplashScreen> {
       SystemChrome.setSystemUIOverlayStyle(
           SystemUiOverlayStyle(statusBarColor: Colors.transparent));
 
-          //navigate to home screen
-      Navigator.pushReplacement(
+          // if user is known move to home or move to login
+          if(Apis.auth != null){
+             Navigator.pushReplacement(
           context, MaterialPageRoute(builder: (context) => const HomeScreen()));
+          }
+          else{
+             Navigator.pushReplacement(
+          context, MaterialPageRoute(builder: (context) => const LoginScreen()));
+          }
+
+          
     });
   }
 

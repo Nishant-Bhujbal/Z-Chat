@@ -1,5 +1,12 @@
+import 'dart:io';
+import 'dart:math';
+
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:zchat/api/apis.dart';
+import 'package:zchat/helper/dialogs.dart';
 import 'package:zchat/screens/home_screen.dart';
 
 import '../main.dart';
@@ -21,6 +28,53 @@ class _LoginScreenState extends State<LoginScreen> {
     Future.delayed(const Duration(milliseconds: 500), () {
       setState(() => isAnimate = true);
     });
+  }
+
+  handleGoogleBtnClick() {
+    Dialogs.showProgressBar(context);
+    signInWithGoogle().then((user) async {
+      Navigator.pop(context);
+
+      if (user != null) {
+        print('user credentials is this boyy : ${user.user}');
+
+        if (await (Apis.userExists())) {
+          Navigator.pushReplacement(
+              context, MaterialPageRoute(builder: (_) => const HomeScreen()));
+        } else {
+          Apis.createUser().then((value) {
+            Navigator.pushReplacement(
+                context, MaterialPageRoute(builder: (_) => const HomeScreen()));
+          });
+        }
+      }
+    });
+  }
+
+  Future<UserCredential?> signInWithGoogle() async {
+    try {
+      await InternetAddress.lookup('www.google.com');
+      // Trigger the authentication flow
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+
+      // Obtain the auth details from the request
+      final GoogleSignInAuthentication? googleAuth =
+          await googleUser?.authentication;
+
+      // Create a new credential
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth?.accessToken,
+        idToken: googleAuth?.idToken,
+      );
+
+      // Once signed in, return the UserCredential
+      return await Apis.auth.signInWithCredential(credential);
+    } catch (e) {
+      print("\n This is the error : $e");
+      Dialogs.showSnackbar(
+          context, "Something went wrong check your interent connnection");
+      return null;
+    }
   }
 
   Widget build(BuildContext context) {
@@ -51,8 +105,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     shape: const StadiumBorder(),
                     elevation: 1),
                 onPressed: () {
-                  Navigator.pushReplacement(context,
-                      MaterialPageRoute(builder: (context) => const HomeScreen()));
+                  handleGoogleBtnClick();
                 },
 
                 //google icon
