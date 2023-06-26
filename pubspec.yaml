@@ -38,9 +38,15 @@ dependencies:
   flutter_launcher_icons: ^0.13.1
   # fore integrating firebase
   firebase_core: ^2.14.0
+  # for handling google sign in 
   google_sign_in: ^6.1.4
+  # for handling firebase authentication
   firebase_auth: ^4.6.3
+  # for accesing colud firebase database
   cloud_firestore: ^4.8.1
+  # for showing netwok image
+  cached_network_image: ^3.2.3
+  image_picker: ^0.8.9
 
 dev_dependencies:
   flutter_test:

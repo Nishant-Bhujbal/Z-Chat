@@ -3,6 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:zchat/model/chat_user.dart';
 
 class Apis {
+  // for saving self information
+  static late ChatUser self;
   // for authentication
   static FirebaseAuth auth = FirebaseAuth.instance;
 
@@ -18,6 +20,18 @@ class Apis {
             .doc(auth.currentUser!.uid)
             .get())
         .exists;
+  }
+
+  // for getting current user information
+  // for getting all users from firestore database
+  static Future<void> getSelfInfo() async {
+    await firestore.collection('users').doc(user.uid).get().then((value) async {
+      if (value.exists) {
+        self = ChatUser.fromJson(value.data()!);
+      } else {
+        await createUser().then((value) => getSelfInfo());
+      }
+    });
   }
 
   // for creating a new user
@@ -39,5 +53,20 @@ class Apis {
         .collection("users")
         .doc(user.uid)
         .set(chatuser.toJson());
+  }
+
+  // for getting all users from firestore database
+  static Stream<QuerySnapshot<Map<String, dynamic>>> getAllusers() {
+    return Apis.firestore
+        .collection('users')
+        .where('id', isNotEqualTo: user.uid)
+        .snapshots();
+  }
+
+  static Future<void> UpdateUserInfor() async {
+    await firestore
+        .collection("users")
+        .doc(user.uid)
+        .update({'name': self.name, 'about': self.about});
   }
 }

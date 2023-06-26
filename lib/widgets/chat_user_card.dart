@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:zchat/main.dart';
 import 'package:zchat/model/chat_user.dart';
@@ -30,15 +31,33 @@ class _ChatUserCardState extends State<ChatUserCard> {
           subtitle: Text(widget.user.about),
 
           //user profile picture
-          leading: CircleAvatar(
-            child: Icon(Icons.person),
+          // leading: const CircleAvatar(child: Icon(Icons.person),),
+          leading: ClipRRect(
+            borderRadius: BorderRadius.circular(mq.height * .25),
+            child: CachedNetworkImage(
+              height: mq.height* .055,
+              width:  mq.height* .055,
+              imageUrl: widget.user.image,
+                  // placeholder: (context, url) => CircularProgressIndicator(),
+                  errorWidget: (context, url, error) => const CircleAvatar(child: Icon(Icons.person),)
+               ),
           ),
 
           // last  message time
-          trailing: Text(
-            "12:00 pm",
-            style: TextStyle(color: Colors.black54),
+          // trailing: Text(
+          //   "12:00 pm",
+          //   style: TextStyle(color: Colors.black54),
+          // ),
+
+          trailing: Container(
+            width: 15,
+            height: 15,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              color: Colors.green
+            ),
           ),
+          
         ),
       ),
     );
