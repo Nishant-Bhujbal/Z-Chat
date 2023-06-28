@@ -242,6 +242,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           setState(() {
                             _image = image.path;
                           });
+                          Apis.updateProfilePicture(File(_image!));
                           Navigator.pop(context);
                         }
                       },
@@ -253,7 +254,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           backgroundColor: Colors.white,
                           shape: const CircleBorder(),
                           fixedSize: Size(mq.width * 0.3, mq.height * 0.15)),
-                      onPressed: () async{
+                      onPressed: () async {
                         final ImagePicker picker = ImagePicker();
                         // Pick an image.
                         final XFile? image =
@@ -262,8 +263,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           setState(() {
                             _image = image.path;
                           });
+                          Apis.updateProfilePicture(File(_image!));
                           Navigator.pop(context);
-                      };
+                        }
+                        ;
                       },
                       child: Image.asset('assets/camera.png'))
                 ],

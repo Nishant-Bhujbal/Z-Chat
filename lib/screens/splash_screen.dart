@@ -29,7 +29,7 @@ class _SplashScreenState extends State<SplashScreen> {
           SystemUiOverlayStyle(statusBarColor: Colors.white));
 
           // if user is known move to home or move to login
-          if(Apis.auth != null){
+          if(Apis.user != null){
              Navigator.pushReplacement(
           context, MaterialPageRoute(builder: (context) => const HomeScreen()));
           }

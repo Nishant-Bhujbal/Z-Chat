@@ -36,7 +36,6 @@ class _LoginScreenState extends State<LoginScreen> {
       Navigator.pop(context);
 
       if (user != null) {
-        print('user credentials is this boyy : ${user.user}');
 
         if (await (Apis.userExists())) {
           Navigator.pushReplacement(
