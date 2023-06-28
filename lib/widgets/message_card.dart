@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:zchat/api/apis.dart';
 import 'package:zchat/helper/my_date_util.dart';
@@ -39,14 +40,32 @@ class _MessageCardState extends State<MessageCard> {
                 color: Colors.blue.shade100,
                 // making borders curved
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.lightBlue)),
-            padding: EdgeInsets.all(mq.width * .04),
-            margin: EdgeInsets.symmetric(
+                border: Border.all(color: Colors.lightBlue)
+                ),
+                padding: EdgeInsets.all(widget.message.type == Type.text ? mq.width * .04 : mq.width * .03),
+                margin: EdgeInsets.symmetric(
                 horizontal: mq.width * .04, vertical: mq.height * .01),
-            child: Text(
+            
+            // to check if image or text
+            child: widget.message.type == Type.text 
+            ?
+            // show text
+            Text(
               widget.message.msg,
               style: const TextStyle(fontSize: 15, color: Colors.black87),
-            ),
+            ) 
+            : 
+            // show image
+            ClipRRect(
+            borderRadius: BorderRadius.circular(5),
+            child: CachedNetworkImage(
+                imageUrl: widget.message.msg,
+                placeholder: (context, url) => const Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: CircularProgressIndicator(strokeWidth: 2,),
+                ),
+                errorWidget: (context, url, error) => const Icon(Icons.image , size: 70,)),
+          ),
           ),
         ),
 
@@ -104,13 +123,28 @@ class _MessageCardState extends State<MessageCard> {
                 // making borders curved
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(color: Colors.lightGreen)),
-            padding: EdgeInsets.all(mq.width * .04),
-            margin: EdgeInsets.symmetric(
+              padding: EdgeInsets.all(widget.message.type == Type.text ? mq.width * .04 : mq.width * .03),
+              margin: EdgeInsets.symmetric(
                 horizontal: mq.width * .04, vertical: mq.height * .01),
-            child: Text(
+            child:  widget.message.type == Type.text 
+            ?
+            // show text
+            Text(
               widget.message.msg,
               style: const TextStyle(fontSize: 15, color: Colors.black87),
-            ),
+            ) 
+            : 
+            // show image
+            ClipRRect(
+            borderRadius: BorderRadius.circular(5),
+            child: CachedNetworkImage(
+                imageUrl: widget.message.msg,
+                placeholder: (context, url) => const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: CircularProgressIndicator(strokeWidth: 2,),
+                ),
+                errorWidget: (context, url, error) => const Icon(Icons.image , size: 70,)),
+          ),
           ),
         ),
       ],

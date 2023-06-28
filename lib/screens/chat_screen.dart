@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:zchat/model/chat_user.dart';
 import 'package:zchat/model/message.dart';
 import 'package:zchat/widgets/message_card.dart';
@@ -27,8 +28,9 @@ class _ChatScreenState extends State<ChatScreen> {
   // for handling message text changes
   final textController = TextEditingController();
 
-  // for storing value of showing or hiding emoji
-  bool _showEmoji = false;
+  // _showEmoji = for storing value of showing or hiding emoji
+  // _isuploading = for checking if image is uploading or not
+  bool _showEmoji = false , _isuploading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -81,6 +83,7 @@ class _ChatScreenState extends State<ChatScreen> {
         
                           if (list.isNotEmpty) {
                             return ListView.builder(
+                              reverse: true,
                                 physics: BouncingScrollPhysics(),
                                 itemCount: list.length,
                                 padding: EdgeInsets.only(top: mq.height * .01),
@@ -101,7 +104,16 @@ class _ChatScreenState extends State<ChatScreen> {
                     },
                   ),
                 ),
-        
+
+                // progress indicator for showing uploading of image in chat
+                if(_isuploading)
+                const Align(
+                  alignment: Alignment.centerRight,
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(vertical: 8.0 , horizontal: 20.0),
+                    child: CircularProgressIndicator(strokeWidth: 2,),
+                  ),),
+
                 // chat input field
                 chatinput(),
         
@@ -170,7 +182,7 @@ class _ChatScreenState extends State<ChatScreen> {
               ),
 
               // for adding some space
-              SizedBox(
+              const SizedBox(
                 height: 2,
               ),
 
@@ -221,6 +233,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     if (_showEmoji) {
                       setState(() {
                         _showEmoji = !_showEmoji;
+
                       });
                     }
                   },
@@ -236,7 +249,19 @@ class _ChatScreenState extends State<ChatScreen> {
 
                 // pick image from gallery
                 IconButton(
-                    onPressed: () {},
+                    onPressed: () async{
+                      final ImagePicker picker = ImagePicker();
+                        // picking multiple images
+                        final List<XFile> images =
+                            await picker.pickMultiImage();
+
+                            //uploading and sending image one by one
+                            for (var i in images) {
+                              setState(()=> _isuploading = true);
+                              Apis.sendChatImage(widget.user,File(i.path));
+                              setState(()=> _isuploading = false);
+                            }
+                    },
                     icon: const Icon(
                       Icons.image,
                       color: Colors.blue,
@@ -245,7 +270,18 @@ class _ChatScreenState extends State<ChatScreen> {
 
                 // take image from camera button
                 IconButton(
-                    onPressed: () {},
+                    onPressed: () async{
+                      final ImagePicker picker = ImagePicker();
+                        // Pick an image.
+                        final XFile? image =
+                            await picker.pickImage(source: ImageSource.camera);
+                          if(image != null){
+                          setState(()=> _isuploading = true);
+                          Apis.sendChatImage(widget.user,File(image.path));
+                          setState(()=> _isuploading = false);
+                          }
+                        },
+                    
                     icon: const Icon(
                       Icons.camera_alt_outlined,
                       color: Colors.blue,
@@ -260,15 +296,15 @@ class _ChatScreenState extends State<ChatScreen> {
         MaterialButton(
           onPressed: () {
             if (textController.text.isNotEmpty) {
-              Apis.sendMessage(widget.user, textController.text);
+              Apis.sendMessage(widget.user, textController.text,Type.text);
               textController.text = '';
             }
           },
           minWidth: 0,
           padding: EdgeInsets.only(top: 10, bottom: 10, left: 5, right: 5),
-          shape: CircleBorder(),
+          shape: const CircleBorder(),
           color: Colors.green,
-          child: Icon(
+          child: const Icon(
             Icons.send,
             color: Colors.white,
             size: 28,
