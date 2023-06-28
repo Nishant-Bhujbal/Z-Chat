@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:zchat/model/chat_user.dart';
+import 'package:zchat/model/message.dart';
 
 class Apis {
   // for authentication
@@ -105,5 +106,61 @@ class Apis {
         .collection('users')
         .doc(user?.uid)
         .update({'image': self.image});
+  }
+
+  /// ************************* Chat Screen Related APIs **********************
+
+  // chats (collection) --> conversation_id(doc) --> messages(collection) --> message(doc)
+
+  //useful for getting conversation id
+  static String getConversation(String id) => user!.uid.hashCode <= id.hashCode
+      ? '${user!.uid}_$id'
+      : '${id}_${user!.uid}';
+
+  // for gettinf all messages of a specific conversation from firestore database
+  static Stream<QuerySnapshot<Map<String, dynamic>>> getAllmessages(
+      ChatUser user) {
+    return Apis.firestore
+        .collection('chats/${getConversation(user.id)}/messages/')
+        .snapshots();
+  }
+
+  // for sending message
+  static Future<void> sendMessage(ChatUser chatUser, String msg) async {
+    // message sending time (also used as id)
+    final time = DateTime.now().millisecondsSinceEpoch.toString();
+
+    // message to send
+    final Message message = Message(
+        msg: msg,
+        read: '',
+        told: chatUser.id,
+        type: Type.text,
+        fromId: user!.uid,
+        sent: time);
+
+    final ref =
+        firestore.collection('chats/${getConversation(chatUser.id)}/messages/');
+    await ref.doc(time).set(message.toJson());
+  }
+
+  // update read status of message
+  static Future<void> updateMessageReadStatus(Message message) async {
+    firestore
+        .collection('chats/${getConversation(message.fromId)}/messages/')
+        .doc(message.sent)
+        .update({
+      'read': DateTime.now().millisecondsSinceEpoch.toString(),
+    });
+  }
+
+  // get only last message of a specific chat
+   static Stream<QuerySnapshot<Map<String, dynamic>>> getLastmessages(
+      ChatUser user) {
+    return Apis.firestore
+        .collection('chats/${getConversation(user.id)}/messages/')
+        .orderBy('sent' , descending: true)
+        .limit(1)
+        .snapshots();
   }
 }

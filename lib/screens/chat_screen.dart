@@ -1,6 +1,12 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:zchat/model/chat_user.dart';
+import 'package:zchat/model/message.dart';
+import 'package:zchat/widgets/message_card.dart';
 
 import '../api/apis.dart';
 import '../main.dart';
@@ -15,63 +21,106 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
+  // for storing all messages
+  List<Message> list = [];
+
+  // for handling message text changes
+  final textController = TextEditingController();
+
+  // for storing value of showing or hiding emoji
+  bool _showEmoji = false;
+
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        // appbar
-        appBar: AppBar(
-          automaticallyImplyLeading: false,
-          flexibleSpace: appbar(),
-        ),
-
-        body: Column(
-          children: [
-            Expanded(
-              child: StreamBuilder(
-                // stream: Apis.getAllusers(),
-                builder: (context, snapshot) {
-                  switch (snapshot.connectionState) {
-                    // if data is loading
-                    case ConnectionState.waiting:
-                    case ConnectionState.none:
-                      // return const Center(
-                      //   child: CircularProgressIndicator(),
-                      // );
-            
-                    // if some or all data is loaded then show it
-                    case ConnectionState.active:
-                    case ConnectionState.done:
-                      // final data = snapshot.data?.docs;
-            
-                      // list =
-                      //     data?.map((e) => ChatUser.fromJson(e.data())).toList() ??
-                      //         [];
-            
-                      final list = [];
-            
-                      if (list.isNotEmpty) {
-                        return ListView.builder(
-                            physics: BouncingScrollPhysics(),
-                            itemCount: list.length,
-                            padding: EdgeInsets.only(top: mq.height * .01),
-                            itemBuilder: (context, index) {
-                              return Text('Message : ${list[index]}');
-                            });
-                      } else {
-                        return const Center(
-                          child: Text(
-                            "Say Hi !! 👋",
-                            style: TextStyle(fontSize: 20),
-                          ),
-                        );
-                      }
-                  }
-                },
-              ),
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: SafeArea(
+        child: WillPopScope(
+          // if emojis are shown and back button is pressed then hide emoji
+          // or else simple close current screen back button click
+          onWillPop: () {
+          if (_showEmoji) {
+            setState(() {
+              _showEmoji = ! _showEmoji;
+            });
+            return Future.value(false);
+          } else {
+            return Future.value(true);
+          }
+        },
+          child: Scaffold(
+            // appbar
+            appBar: AppBar(
+              automaticallyImplyLeading: false,
+              flexibleSpace: appbar(),
             ),
-            chatinput(),
-          ],
+        
+            backgroundColor: Colors.blue[50],
+        
+            body: Column(
+              children: [
+                Expanded(
+                  child: StreamBuilder(
+                    stream: Apis.getAllmessages(widget.user),
+                    builder: (context, snapshot) {
+                      switch (snapshot.connectionState) {
+                        // if data is loading
+                        case ConnectionState.waiting:
+                        case ConnectionState.none:
+                          return const SizedBox();
+        
+                        // if some or all data is loaded then show it
+                        case ConnectionState.active:
+                        case ConnectionState.done:
+                          final data = snapshot.data?.docs;
+        
+                          list = data
+                                  ?.map((e) => Message.fromJson(e.data()))
+                                  .toList() ??
+                              [];
+        
+                          if (list.isNotEmpty) {
+                            return ListView.builder(
+                                physics: BouncingScrollPhysics(),
+                                itemCount: list.length,
+                                padding: EdgeInsets.only(top: mq.height * .01),
+                                itemBuilder: (context, index) {
+                                  return MessageCard(
+                                    message: list[index],
+                                  );
+                                });
+                          } else {
+                            return const Center(
+                              child: Text(
+                                "Say Hi !! 👋",
+                                style: TextStyle(fontSize: 20),
+                              ),
+                            );
+                          }
+                      }
+                    },
+                  ),
+                ),
+        
+                // chat input field
+                chatinput(),
+        
+                // show emojis on keyboard emoji button click and vice versa
+                if (_showEmoji)
+                  SizedBox(
+                    height: mq.height * .35,
+                    child: EmojiPicker(
+                      textEditingController: textController,
+                      config: Config(
+                        bgColor: Color.fromARGB(255, 214, 236, 250),
+                        columns: 7,
+                        emojiSizeMax: 32 * (Platform.isIOS ? 1.30 : 1.0),
+                      ),
+                    ),
+                  )
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -153,18 +202,31 @@ class _ChatScreenState extends State<ChatScreen> {
               children: [
                 // emoji button
                 IconButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      FocusScope.of(context).unfocus();
+                      setState(() {
+                        _showEmoji = !_showEmoji;
+                      });
+                    },
                     icon: const Icon(
                       Icons.emoji_emotions,
                       color: Colors.blue,
                       size: 26,
                     )),
 
-                const Expanded(
+                Expanded(
                     child: TextField(
+                  controller: textController,
+                  onTap: () {
+                    if (_showEmoji) {
+                      setState(() {
+                        _showEmoji = !_showEmoji;
+                      });
+                    }
+                  },
                   keyboardType: TextInputType.multiline,
                   maxLines: null,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                       border: InputBorder.none,
                       hintText: "Type something",
                       hintStyle: TextStyle(
@@ -196,7 +258,12 @@ class _ChatScreenState extends State<ChatScreen> {
 
         // send material button
         MaterialButton(
-          onPressed: () {},
+          onPressed: () {
+            if (textController.text.isNotEmpty) {
+              Apis.sendMessage(widget.user, textController.text);
+              textController.text = '';
+            }
+          },
           minWidth: 0,
           padding: EdgeInsets.only(top: 10, bottom: 10, left: 5, right: 5),
           shape: CircleBorder(),
