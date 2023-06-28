@@ -26,7 +26,7 @@ class _SplashScreenState extends State<SplashScreen> {
       //exit full screen
       SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
       SystemChrome.setSystemUIOverlayStyle(
-          SystemUiOverlayStyle(statusBarColor: Colors.white));
+          const SystemUiOverlayStyle(statusBarColor: Colors.white));
 
           // if user is known move to home or move to login
           if(Apis.user != null){
