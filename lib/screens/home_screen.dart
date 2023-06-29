@@ -29,8 +29,6 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     Apis.getSelfInfo();
 
-    // for setting user active status to active
-    Apis.updateActiveStatus(true);
 
     // for updating user active status according to lifecycle events
     // resume --- active or online
@@ -45,7 +43,7 @@ class _HomeScreenState extends State<HomeScreen> {
         Apis.updateActiveStatus(true);
       }
       }
-      
+
       return Future.value(message);
     });
   }

@@ -1,9 +1,12 @@
+import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:http/http.dart';
 import 'package:zchat/model/chat_user.dart';
 import 'package:zchat/model/message.dart';
 
@@ -20,7 +23,63 @@ class Apis {
   // for saving self information
   static late ChatUser self;
 
+  // to return current user
   static User? get user => auth.currentUser;
+
+  // for accesing firebase messaging (Push Notification)
+  static FirebaseMessaging fmessaging = FirebaseMessaging.instance;
+
+  // for getting firebase messaging token
+  static Future<void> getFirebaseMessagingToken() async {
+    await fmessaging.requestPermission();
+
+    fmessaging.getToken().then((value) {
+      if (value != null) {
+        self.pushToken = value;
+        print(" this is push token babay ${value}");
+      }
+    });
+
+        // for handling foreground notification
+    // FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+    //   print('Got a message whilst in the foreground!');
+    //   print('Message data: ${message.data}');
+
+    //   if (message.notification != null) {
+    //     print('Message also contained a notification: ${message.notification}');
+    //   }
+    // });
+  }
+
+  // for sending push notifications
+  static Future<void> sendPushNotification(
+      ChatUser chatUser, String msg) async {
+    try {
+      final body = {
+        "to": chatUser.pushToken,
+        "notification": {
+          "title": self.name, //our name should be send
+          "body": msg,
+          "android_channel_id": "chats"
+        },
+        "data": {
+          "some_data": "User ID : ${self.id}",
+        },
+      };
+      var response =
+          await post(Uri.parse('https://fcm.googleapis.com/fcm/send'),
+              headers: {
+                HttpHeaders.contentTypeHeader: 'application/json',
+                HttpHeaders.authorizationHeader:
+                    'key=AAAAHl-cXB4:APA91bFgc5fU_0OCemA_PNsdgyS3NNCanV81nxpeyXPrBJiPJ-eBqj2zvw4wWuzYcWNs3kwYnepZLRx6u5YvK8A37cQRwQbR7hYF6eqYzr9CLMYbeSOaXsZknRXOvef-0a5d5ApW0QaK'
+              },
+              body: jsonEncode(body));
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+    } catch (e) {
+      print("\n bro this is error : $e");
+    }
+  }
 
   // for checking if user exists or not
   static Future<bool> userExists() async {
@@ -41,6 +100,10 @@ class Apis {
         .then((value) async {
       if (value.exists) {
         self = ChatUser.fromJson(value.data()!);
+        await getFirebaseMessagingToken();
+
+        // for setting user active status to active
+        Apis.updateActiveStatus(true);
       } else {
         log("current user is null");
         await createUser().then((value) => getSelfInfo());
@@ -98,7 +161,8 @@ class Apis {
   static Future<void> updateActiveStatus(bool isOnline) async {
     Apis.firestore.collection('users').doc(user!.uid).update({
       'is_online': isOnline,
-      'last_active': DateTime.now().millisecondsSinceEpoch.toString()
+      'last_active': DateTime.now().millisecondsSinceEpoch.toString(),
+      'push_token': self.pushToken
     });
   }
 
@@ -161,7 +225,8 @@ class Apis {
 
     final ref =
         firestore.collection('chats/${getConversation(chatUser.id)}/messages/');
-    await ref.doc(time).set(message.toJson());
+    await ref.doc(time).set(message.toJson()).then((value) =>
+        sendPushNotification(chatUser, type == Type.text ? msg : 'image'));
   }
 
   // update read status of message
@@ -203,5 +268,26 @@ class Apis {
     // updating image in firestore database
     final imageurl = await ref.getDownloadURL();
     await sendMessage(chatUser, imageurl, Type.image);
+  }
+
+
+    // delete chat messages
+    static Future<void> deleteMessage(Message message) async {
+    await firestore
+        .collection('chats/${getConversation(message.told)}/messages/')
+        .doc(message.sent)
+        .delete();
+
+    if (message.type == Type.image) {
+      await storage.refFromURL(message.msg).delete();
+    }
+  }
+
+  //update message
+  static Future<void> updateMessage(Message message, String updatedMsg) async {
+    await firestore
+        .collection('chats/${getConversation(message.told)}/messages/')
+        .doc(message.sent)
+        .update({'msg': updatedMsg});
   }
 }

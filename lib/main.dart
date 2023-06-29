@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_notification_channel/flutter_notification_channel.dart';
+import 'package:flutter_notification_channel/notification_importance.dart';
+import 'package:flutter_notification_channel/notification_visibility.dart';
 import 'package:zchat/screens/splash_screen.dart';
 import 'auth/login_screen.dart';
 import 'screens/home_screen.dart';
@@ -17,10 +20,12 @@ void main() async {
       [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]).then(
     (value) {
       Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+      fluuterNotificationChannel();
       runApp(const MyApp());
     },
   );
 }
+
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -31,7 +36,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Z-Chat',
       theme: ThemeData(
-          appBarTheme: AppBarTheme(
+          appBarTheme: const AppBarTheme(
         elevation: 1,
         iconTheme: IconThemeData(color: Colors.black),
         centerTitle: true,
@@ -39,7 +44,17 @@ class MyApp extends StatelessWidget {
             color: Colors.black, fontWeight: FontWeight.normal, fontSize: 25),
         backgroundColor: Colors.white,
       )),
-      home: SplashScreen(),
-    );
+      home: SplashScreen(),);
   }
+
+}
+
+void fluuterNotificationChannel() async{
+  var result = await FlutterNotificationChannel.registerNotificationChannel(
+    description: 'For showing message notification ',
+    id: 'chats',
+    importance: NotificationImportance.IMPORTANCE_HIGH,
+    name: 'Chats',
+);
+print("this is result notificatio re baba $result");
 }

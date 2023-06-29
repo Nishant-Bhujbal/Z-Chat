@@ -11,9 +11,31 @@ class MyDateUtil {
     return TimeOfDay.fromDateTime(date).format(context);
   }
 
+  // for gettinf formatted time for sent and read
+  static String getMessageTime(
+      {required BuildContext context, required String time}) {
+    final DateTime sent_time =
+        DateTime.fromMillisecondsSinceEpoch(int.parse(time));
+    final DateTime now = DateTime.now();
+
+    final formattedTime = TimeOfDay.fromDateTime(sent_time).format(context);
+
+    if (now.day == sent_time.day &&
+        now.month == sent_time.month &&
+        now.year == sent_time.year) {
+      return formattedTime;
+    }
+
+    return now.year == sent_time.year
+        ? '$formattedTime - ${sent_time.day} ${getMonth(sent_time)}'
+        : '$formattedTime - ${sent_time.day} ${getMonth(sent_time)} ${sent_time.year}';
+  }
+
   // get last message time(used in chat user card)
   static String getLastMessageTime(
-      {required BuildContext context, required String time , bool showYear = false}) {
+      {required BuildContext context,
+      required String time,
+      bool showYear = false}) {
     final DateTime sent_time =
         DateTime.fromMillisecondsSinceEpoch(int.parse(time));
     final DateTime now = DateTime.now();
@@ -24,7 +46,9 @@ class MyDateUtil {
       return TimeOfDay.fromDateTime(sent_time).format(context);
     }
 
-    return showYear ?'${sent_time.day} ${getMonth(sent_time)}' ' ${sent_time.year}' : '${sent_time.day} ${getMonth(sent_time)}';
+    return showYear
+        ? '${sent_time.day} ${getMonth(sent_time)}' ' ${sent_time.year}'
+        : '${sent_time.day} ${getMonth(sent_time)}';
   }
 
   // get month name from mont no, or index
@@ -59,7 +83,7 @@ class MyDateUtil {
   }
 
   // get formatted last active time
-   static String getLastActiveTime(
+  static String getLastActiveTime(
       {required BuildContext context, required String lastActiveTime}) {
     final int i = int.tryParse(lastActiveTime) ?? -1;
 
@@ -84,5 +108,4 @@ class MyDateUtil {
     String Month = getMonth(time);
     return 'last seen on ${time.day} $Month on $formattedTime';
   }
-
 }
