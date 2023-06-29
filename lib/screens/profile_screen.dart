@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -39,6 +40,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           child: FloatingActionButton.extended(
             onPressed: () async {
               Dialogs.showProgressBar(context);
+              await Apis.updateActiveStatus(false);
               await Apis.auth.signOut().then(
                 (value) async {
                   await GoogleSignIn().signOut().then((value) => {
@@ -46,6 +48,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         Navigator.pop(context),
                         // for moving to home screen
                         Navigator.pop(context),
+
+                        Apis.auth = FirebaseAuth.instance,
 
                         Navigator.pushReplacement(
                             context,
@@ -80,14 +84,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             child: Image.file(File(_image!),
                                 height: mq.height * .2,
                                 width: mq.height * .2,
-                                fit: BoxFit.fill))
+                                fit: BoxFit.cover))
                         :
 
                         // image from server
                         ClipRRect(
                             borderRadius: BorderRadius.circular(mq.height * .1),
                             child: CachedNetworkImage(
-                                fit: BoxFit.fill,
+                                fit: BoxFit.cover,
                                 height: mq.height * .2,
                                 width: mq.height * .2,
                                 imageUrl: widget.user.image,

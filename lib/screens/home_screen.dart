@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:zchat/api/apis.dart';
 import 'package:zchat/auth/login_screen.dart';
@@ -27,6 +28,26 @@ class _HomeScreenState extends State<HomeScreen> {
     // TODO: implement setState
     super.initState();
     Apis.getSelfInfo();
+
+    // for setting user active status to active
+    Apis.updateActiveStatus(true);
+
+    // for updating user active status according to lifecycle events
+    // resume --- active or online
+    // pause --- inactive or offline
+    SystemChannels.lifecycle.setMessageHandler((message) {
+
+      if(Apis.auth.currentUser != null){
+        if (message.toString().contains('pause')) {
+        Apis.updateActiveStatus(false);
+      }
+      if (message.toString().contains('resume')) {
+        Apis.updateActiveStatus(true);
+      }
+      }
+      
+      return Future.value(message);
+    });
   }
 
   Widget build(BuildContext context) {

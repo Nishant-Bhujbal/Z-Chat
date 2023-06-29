@@ -77,11 +77,29 @@ class Apis {
         .snapshots();
   }
 
+  // for updating user info of name and about from profiel_picture
   static Future<void> UpdateUserInfor() async {
     await firestore
         .collection("users")
         .doc(user!.uid)
         .update({'name': self.name, 'about': self.about});
+  }
+
+  // for getting specific user info
+  static Stream<QuerySnapshot<Map<String, dynamic>>> getUserInfo(
+      ChatUser chatUser) {
+    return Apis.firestore
+        .collection('users')
+        .where('id', isNotEqualTo: chatUser.id)
+        .snapshots();
+  }
+
+  // update online or last active stautus of users
+  static Future<void> updateActiveStatus(bool isOnline) async {
+    Apis.firestore.collection('users').doc(user!.uid).update({
+      'is_online': isOnline,
+      'last_active': DateTime.now().millisecondsSinceEpoch.toString()
+    });
   }
 
   // update profile picture of user
@@ -129,7 +147,6 @@ class Apis {
   // for sending message
   static Future<void> sendMessage(
       ChatUser chatUser, String msg, Type type) async {
-        
     // message sending time (also used as id)
     final time = DateTime.now().millisecondsSinceEpoch.toString();
 

@@ -97,7 +97,7 @@ class _MessageCardState extends State<MessageCard> {
 
             // double tick blue icon for message read
             if (widget.message.read.isNotEmpty)
-              Icon(
+              const Icon(
                 Icons.done_all_rounded,
                 color: Colors.blue,
                 size: 20,
