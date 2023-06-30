@@ -1,19 +1,10 @@
-import 'dart:convert';
-import 'dart:io';
+
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:zchat/api/apis.dart';
-import 'package:zchat/auth/login_screen.dart';
-import 'package:zchat/helper/dialogs.dart';
 import 'package:zchat/helper/my_date_util.dart';
 import 'package:zchat/main.dart';
 import 'package:zchat/model/chat_user.dart';
-import 'package:zchat/widgets/chat_user_card.dart';
 
 class ViewProfileScreen extends StatefulWidget {
   final ChatUser user;

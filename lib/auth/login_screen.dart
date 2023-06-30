@@ -1,8 +1,9 @@
+import 'dart:developer';
 import 'dart:io';
-import 'dart:math';
+
 
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
+
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:zchat/api/apis.dart';
@@ -69,7 +70,7 @@ class _LoginScreenState extends State<LoginScreen> {
       // Once signed in, return the UserCredential
       return await Apis.auth.signInWithCredential(credential);
     } catch (e) {
-      print("\n This is the error : $e");
+      log("\n This is the error : $e");
       Dialogs.showSnackbar(
           context, "Something went wrong check your interent connnection");
       return null;

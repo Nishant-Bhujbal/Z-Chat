@@ -21,7 +21,16 @@ class Apis {
   static FirebaseStorage storage = FirebaseStorage.instance;
 
   // for saving self information
-  static late ChatUser self;
+  static ChatUser self = ChatUser(
+      id: user!.uid,
+      name: user!.displayName.toString(),
+      email: user!.email.toString(),
+      about: "Hey, I'm using We Chat!",
+      image: user!.photoURL.toString(),
+      createdAt: '',
+      isOnline: false,
+      lastActive: '',
+      pushToken: '');
 
   // to return current user
   static User? get user => auth.currentUser;
@@ -36,7 +45,6 @@ class Apis {
     fmessaging.getToken().then((value) {
       if (value != null) {
         self.pushToken = value;
-        print(" this is push token babay ${value}");
       }
     });
 
@@ -74,10 +82,10 @@ class Apis {
                     'key=AAAAHl-cXB4:APA91bFgc5fU_0OCemA_PNsdgyS3NNCanV81nxpeyXPrBJiPJ-eBqj2zvw4wWuzYcWNs3kwYnepZLRx6u5YvK8A37cQRwQbR7hYF6eqYzr9CLMYbeSOaXsZknRXOvef-0a5d5ApW0QaK'
               },
               body: jsonEncode(body));
-      print('Response status: ${response.statusCode}');
-      print('Response body: ${response.body}');
+      log('Response status: ${response.statusCode}');
+      log('Response body: ${response.body}');
     } catch (e) {
-      print("\n bro this is error : $e");
+      log("\n bro this is error : $e");
     }
   }
 
@@ -99,7 +107,7 @@ class Apis {
 
     if (data.docs.isNotEmpty && data.docs.first.id != user!.uid) {
       // user exists
-      print('Users exists : ${data.docs.first.data()}');
+      log('Users exists : ${data.docs.first.data()}');
 
       firestore
           .collection('users')
@@ -138,13 +146,13 @@ class Apis {
 
   // for creating a new user
   static Future<void> createUser() async {
-    final time = DateTime.now().microsecondsSinceEpoch.toString();
+    final time = DateTime.now().millisecondsSinceEpoch.toString();
 
     final chatuser = ChatUser(
         image: user!.photoURL.toString(),
         name: user!.displayName.toString(),
-        createdAt: 'time',
-        lastActive: 'time',
+        createdAt: time,
+        lastActive: time,
         isOnline: false,
         id: user!.uid,
         email: user!.email.toString(),
@@ -161,7 +169,7 @@ class Apis {
   static Stream<QuerySnapshot<Map<String, dynamic>>> getAllusers(List<String> userIds) {
     return Apis.firestore
         .collection('users')
-        .where('id', whereIn: userIds )
+        .where('id', whereIn: userIds.isEmpty ? [''] : userIds )
         .snapshots();
   }
 
@@ -182,13 +190,13 @@ class Apis {
   static Stream<QuerySnapshot<Map<String, dynamic>>> getMyUsersId() {
     return Apis.firestore
         .collection('users')
-        .doc(user!.uid)
+        .doc(user?.uid)
         .collection('my_users')
         .snapshots();
   }
 
   // for updating user info of name and about from profiel_picture
-  static Future<void> UpdateUserInfor() async {
+  static Future<void> updateUserInfor() async {
     await firestore
         .collection("users")
         .doc(user!.uid)
@@ -218,7 +226,7 @@ class Apis {
   static Future<void> updateProfilePicture(File file) async {
     // getting file extension
     final ext = file.path.split('.').last;
-    print("Extension $ext");
+    log("Extension $ext");
 
     // storage file with path
     final ref = storage.ref().child('profile_Pictures/${user?.uid}');
@@ -227,7 +235,7 @@ class Apis {
     await ref
         .putFile(file, SettableMetadata(contentType: 'image/$ext'))
         .then((p0) {
-      print('data tranferred : ${p0.bytesTransferred / 1000} kb');
+      log('data tranferred : ${p0.bytesTransferred / 1000} kb');
     });
 
     // updating image in firestore database
@@ -310,7 +318,7 @@ class Apis {
     await ref
         .putFile(file, SettableMetadata(contentType: 'image/$ext'))
         .then((p0) {
-      print('data tranferred : ${p0.bytesTransferred / 1000} kb');
+      log('data tranferred : ${p0.bytesTransferred / 1000} kb');
     });
 
     // updating image in firestore database

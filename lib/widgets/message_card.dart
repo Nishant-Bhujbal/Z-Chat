@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -34,7 +36,7 @@ class _MessageCardState extends State<MessageCard> {
     // update last read message if sender and receiver are different
     if (widget.message.read.isEmpty) {
       Apis.updateMessageReadStatus(widget.message);
-      print("message read updated ana bhava");
+      log("message read updated ana bhava");
     }
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -68,7 +70,7 @@ class _MessageCardState extends State<MessageCard> {
                     child: CachedNetworkImage(
                         imageUrl: widget.message.msg,
                         placeholder: (context, url) => const Padding(
-                              padding: const EdgeInsets.all(8.0),
+                              padding: EdgeInsets.all(8.0),
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
                               ),
@@ -168,7 +170,6 @@ class _MessageCardState extends State<MessageCard> {
         ),
       ],
     );
-    ;
   }
 
   // bottom sheet for modifying message details
@@ -235,7 +236,7 @@ class _MessageCardState extends State<MessageCard> {
                             }
                           });
                         } catch (e) {
-                          print("Error while saving image &e");
+                          log("Error while saving image &e");
                         }
                       }),
 
@@ -399,7 +400,7 @@ class _OptionItem extends StatelessWidget {
             Flexible(
                 child: Text(
               '     $name',
-              style: TextStyle(
+              style: const TextStyle(
                   fontSize: 15, color: Colors.black87, letterSpacing: 0.5),
             ))
           ],

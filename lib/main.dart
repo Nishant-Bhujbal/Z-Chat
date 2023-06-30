@@ -1,11 +1,10 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_notification_channel/flutter_notification_channel.dart';
 import 'package:flutter_notification_channel/notification_importance.dart';
-import 'package:flutter_notification_channel/notification_visibility.dart';
 import 'package:zchat/screens/splash_screen.dart';
-import 'auth/login_screen.dart';
-import 'screens/home_screen.dart';
 import 'firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
 
@@ -44,7 +43,7 @@ class MyApp extends StatelessWidget {
             color: Colors.black, fontWeight: FontWeight.normal, fontSize: 25),
         backgroundColor: Colors.white,
       )),
-      home: SplashScreen(),);
+      home: const SplashScreen(),);
   }
 
 }
@@ -56,5 +55,5 @@ void fluuterNotificationChannel() async{
     importance: NotificationImportance.IMPORTANCE_HIGH,
     name: 'Chats',
 );
-print("this is result notificatio re baba $result");
+log("this is result notificatio re baba $result");
 }

@@ -1,3 +1,5 @@
+
+
 import 'package:flutter/material.dart';
 
 class MyDateUtil {
@@ -36,19 +38,19 @@ class MyDateUtil {
       {required BuildContext context,
       required String time,
       bool showYear = false}) {
-    final DateTime sent_time =
-        DateTime.fromMillisecondsSinceEpoch(int.parse(time));
+
+    final DateTime sent = DateTime.fromMillisecondsSinceEpoch(int.parse(time));
     final DateTime now = DateTime.now();
 
-    if (now.day == sent_time.day &&
-        now.month == sent_time.month &&
-        now.year == sent_time.year) {
-      return TimeOfDay.fromDateTime(sent_time).format(context);
+    if (now.day == sent.day &&
+        now.month == sent.month &&
+        now.year == sent.year) {
+      return TimeOfDay.fromDateTime(sent).format(context);
     }
 
     return showYear
-        ? '${sent_time.day} ${getMonth(sent_time)}' ' ${sent_time.year}'
-        : '${sent_time.day} ${getMonth(sent_time)}';
+        ? '${sent.day} ${getMonth(sent)} ${sent.year}'
+        : '${sent.day} ${getMonth(sent)}';
   }
 
   // get month name from mont no, or index
@@ -98,11 +100,11 @@ class MyDateUtil {
     if (now.day == time.day &&
         now.month == time.month &&
         now.year == time.year) {
-      return 'Last seen today at ${formattedTime}';
+      return 'Last seen today at $formattedTime';
     }
 
     if ((now.difference(time).inHours / 24).round() == 1) {
-      return 'Last seen yesterday at ${formattedTime}';
+      return 'Last seen yesterday at $formattedTime';
     }
 
     String Month = getMonth(time);

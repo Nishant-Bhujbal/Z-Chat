@@ -1,9 +1,9 @@
-import 'dart:convert';
+
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
+
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:image_picker/image_picker.dart';
@@ -12,7 +12,7 @@ import 'package:zchat/auth/login_screen.dart';
 import 'package:zchat/helper/dialogs.dart';
 import 'package:zchat/main.dart';
 import 'package:zchat/model/chat_user.dart';
-import 'package:zchat/widgets/chat_user_card.dart';
+
 
 class ProfileScreen extends StatefulWidget {
   final ChatUser user;
@@ -60,7 +60,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               );
             },
             icon: const Icon(Icons.logout_outlined),
-            label: Text("Logout"),
+            label: const Text("Logout"),
             backgroundColor: Colors.redAccent,
           ),
         ),
@@ -140,12 +140,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     decoration: InputDecoration(
                       border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12)),
-                      prefixIcon: Icon(
+                      prefixIcon: const Icon(
                         Icons.person,
                         color: Colors.blue,
                       ),
                       hintText: "eg Happy Singh",
-                      label: Text("Name"),
+                      label: const Text("Name"),
                     ),
                   ),
                   SizedBox(
@@ -160,12 +160,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     decoration: InputDecoration(
                       border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12)),
-                      prefixIcon: Icon(
+                      prefixIcon: const Icon(
                         Icons.info_outline,
                         color: Colors.blue,
                       ),
                       hintText: "eg Feeling Happy",
-                      label: Text("about"),
+                      label: const Text("about"),
                     ),
                   ),
                   SizedBox(
@@ -175,7 +175,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     onPressed: () {
                       if (formkey.currentState!.validate()) {
                         formkey.currentState!.save();
-                        Apis.UpdateUserInfor().then((value) => {
+                        Apis.updateUserInfor().then((value) => {
                               Dialogs.showSnackbar(
                                   context, "profile updated successfully")
                             });
@@ -270,7 +270,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           Apis.updateProfilePicture(File(_image!));
                           Navigator.pop(context);
                         }
-                        ;
                       },
                       child: Image.asset('assets/camera.png'))
                 ],

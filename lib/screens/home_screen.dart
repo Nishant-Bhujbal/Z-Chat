@@ -1,11 +1,11 @@
-import 'dart:convert';
+
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_sign_in/google_sign_in.dart';
+
 import 'package:zchat/api/apis.dart';
-import 'package:zchat/auth/login_screen.dart';
+
 import 'package:zchat/helper/dialogs.dart';
 import 'package:zchat/main.dart';
 import 'package:zchat/model/chat_user.dart';
@@ -68,12 +68,12 @@ class _HomeScreenState extends State<HomeScreen> {
           appBar: AppBar(
             title: isSearching
                 ? TextField(
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       border: InputBorder.none,
                       hintText: "Name, Email, ...",
                     ),
                     autofocus: true,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 16,
                       letterSpacing: 0.5,
                     ),
@@ -96,8 +96,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       }
                     },
                   )
-                : Text("Z-Chat"),
-            leading: Icon(CupertinoIcons.home),
+                : const Text("Z-Chat"),
+            leading: const Icon(CupertinoIcons.home),
             actions: [
               IconButton(
                   onPressed: () {
@@ -136,13 +136,14 @@ class _HomeScreenState extends State<HomeScreen> {
                   // if data is loading
                   case ConnectionState.waiting:
                   case ConnectionState.none:
+                  return const Center(child: CircularProgressIndicator());
 
                   // if some or all data is loaded then show it
                   case ConnectionState.active:
                   case ConnectionState.done:
                     return StreamBuilder(
-                      stream: Apis.getAllusers(
-                          snapshot.data?.docs.map((e) => e.id).toList() ?? []),
+                      stream:  Apis.getAllusers(
+                        snapshot.data?.docs.map((e) => e.id).toList() ?? []),
 
                       // get only those users, who's ids are
                       builder: (context, snapshot) {
@@ -166,7 +167,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                             if (list.isNotEmpty) {
                               return ListView.builder(
-                                  physics: BouncingScrollPhysics(),
+                                  physics: const BouncingScrollPhysics(),
                                   itemCount: isSearching
                                       ? searchList.length
                                       : list.length,

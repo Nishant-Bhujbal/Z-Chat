@@ -1,5 +1,4 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:zchat/main.dart';
 import 'package:zchat/model/chat_user.dart';
@@ -59,10 +58,10 @@ class ProfileDialog extends StatelessWidget {
                         MaterialPageRoute(
                             builder: (_) => ViewProfileScreen(user: user)));
                   },
-                  shape: CircleBorder(),
+                  shape: const CircleBorder(),
                   minWidth: 0,
-                  padding: EdgeInsets.all(0),
-                  child: Icon(
+                  padding: const EdgeInsets.all(0),
+                  child: const Icon(
                     Icons.info_outline,
                     color: Colors.blue,
                     size: 30,

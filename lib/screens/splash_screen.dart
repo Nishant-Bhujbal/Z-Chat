@@ -1,5 +1,4 @@
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:zchat/api/apis.dart';
@@ -57,7 +56,7 @@ class _SplashScreenState extends State<SplashScreen> {
         Positioned(
             bottom: mq.height * .25,
             width: mq.width,
-            child: Text(
+            child: const Text(
               "MADE IN INDIA WITH 💖",
               style: TextStyle(
                 fontSize: 16,

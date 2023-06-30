@@ -1,4 +1,4 @@
-import 'dart:convert';
+
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
@@ -86,7 +86,7 @@ class _ChatScreenState extends State<ChatScreen> {
                           if (list.isNotEmpty) {
                             return ListView.builder(
                                 reverse: true,
-                                physics: BouncingScrollPhysics(),
+                                physics: const BouncingScrollPhysics(),
                                 itemCount: list.length,
                                 padding: EdgeInsets.only(top: mq.height * .01),
                                 itemBuilder: (context, index) {
@@ -130,7 +130,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     child: EmojiPicker(
                       textEditingController: textController,
                       config: Config(
-                        bgColor: Color.fromARGB(255, 214, 236, 250),
+                        bgColor:const  Color.fromARGB(255, 214, 236, 250),
                         columns: 7,
                         emojiSizeMax: 32 * (Platform.isIOS ? 1.30 : 1.0),
                       ),
@@ -183,7 +183,7 @@ class _ChatScreenState extends State<ChatScreen> {
                           )),
                 ),
 
-                SizedBox(
+                const SizedBox(
                   width: 10,
                 ),
 
@@ -333,7 +333,7 @@ class _ChatScreenState extends State<ChatScreen> {
             }
           },
           minWidth: 0,
-          padding: EdgeInsets.only(top: 10, bottom: 10, left: 5, right: 5),
+          padding: const EdgeInsets.only(top: 10, bottom: 10, left: 5, right: 5),
           shape: const CircleBorder(),
           color: Colors.green,
           child: const Icon(
