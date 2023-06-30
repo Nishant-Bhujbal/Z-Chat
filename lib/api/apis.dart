@@ -40,7 +40,7 @@ class Apis {
       }
     });
 
-        // for handling foreground notification
+    // for handling foreground notification
     // FirebaseMessaging.onMessage.listen((RemoteMessage message) {
     //   print('Got a message whilst in the foreground!');
     //   print('Message data: ${message.data}');
@@ -90,6 +90,31 @@ class Apis {
         .exists;
   }
 
+  // for adding an chat user for our conversation
+  static Future<bool> addChatUser(String email) async {
+    final data = await firestore
+        .collection("users")
+        .where('email', isEqualTo: email)
+        .get();
+
+    if (data.docs.isNotEmpty && data.docs.first.id != user!.uid) {
+      // user exists
+      print('Users exists : ${data.docs.first.data()}');
+
+      firestore
+          .collection('users')
+          .doc(user!.uid)
+          .collection('my_users')
+          .doc(data.docs.first.id)
+          .set({});
+
+      return true;
+    } else {
+      // user dont exists
+      return false;
+    }
+  }
+
   // for getting current user information
   // for getting all users from firestore database
   static Future<void> getSelfInfo() async {
@@ -133,10 +158,32 @@ class Apis {
   }
 
   // for getting all users from firestore database
-  static Stream<QuerySnapshot<Map<String, dynamic>>> getAllusers() {
+  static Stream<QuerySnapshot<Map<String, dynamic>>> getAllusers(List<String> userIds) {
     return Apis.firestore
         .collection('users')
-        .where('id', isNotEqualTo: user!.uid)
+        .where('id', whereIn: userIds )
+        .snapshots();
+  }
+
+
+    // for adding an user to my user when first message is send
+  static Future<void> sendFirstMessage(
+      ChatUser chatUser, String msg, Type type) async {
+    await firestore
+        .collection('users')
+        .doc(chatUser.id)
+        .collection('my_users')
+        .doc(user!.uid)
+        .set({}).then((value) => sendMessage(chatUser, msg, type));
+  }
+
+
+  // for getting ids known to users from firestore database
+  static Stream<QuerySnapshot<Map<String, dynamic>>> getMyUsersId() {
+    return Apis.firestore
+        .collection('users')
+        .doc(user!.uid)
+        .collection('my_users')
         .snapshots();
   }
 
@@ -149,11 +196,12 @@ class Apis {
   }
 
   // for getting specific user info
+  // for getting specific user info
   static Stream<QuerySnapshot<Map<String, dynamic>>> getUserInfo(
       ChatUser chatUser) {
-    return Apis.firestore
+    return firestore
         .collection('users')
-        .where('id', isNotEqualTo: chatUser.id)
+        .where('id', isEqualTo: chatUser.id)
         .snapshots();
   }
 
@@ -270,9 +318,8 @@ class Apis {
     await sendMessage(chatUser, imageurl, Type.image);
   }
 
-
-    // delete chat messages
-    static Future<void> deleteMessage(Message message) async {
+  // delete chat messages
+  static Future<void> deleteMessage(Message message) async {
     await firestore
         .collection('chats/${getConversation(message.told)}/messages/')
         .doc(message.sent)

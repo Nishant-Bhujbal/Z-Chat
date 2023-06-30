@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:zchat/api/apis.dart';
 import 'package:zchat/auth/login_screen.dart';
+import 'package:zchat/helper/dialogs.dart';
 import 'package:zchat/main.dart';
 import 'package:zchat/model/chat_user.dart';
 import 'package:zchat/screens/profile_screen.dart';
@@ -29,19 +30,17 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     Apis.getSelfInfo();
 
-
     // for updating user active status according to lifecycle events
     // resume --- active or online
     // pause --- inactive or offline
     SystemChannels.lifecycle.setMessageHandler((message) {
-
-      if(Apis.auth.currentUser != null){
+      if (Apis.auth.currentUser != null) {
         if (message.toString().contains('pause')) {
-        Apis.updateActiveStatus(false);
-      }
-      if (message.toString().contains('resume')) {
-        Apis.updateActiveStatus(true);
-      }
+          Apis.updateActiveStatus(false);
+        }
+        if (message.toString().contains('resume')) {
+          Apis.updateActiveStatus(true);
+        }
       }
 
       return Future.value(message);
@@ -122,59 +121,154 @@ class _HomeScreenState extends State<HomeScreen> {
           floatingActionButton: Padding(
             padding: const EdgeInsets.only(bottom: 10),
             child: FloatingActionButton(
-              onPressed: () async {
-                await Apis.auth.signOut();
-                await GoogleSignIn().signOut();
-                Navigator.pushReplacement(
-                    context, MaterialPageRoute(builder: (_) => LoginScreen()));
+              onPressed: () {
+                addChatUserDialog();
               },
               child: const Icon(Icons.add_comment_rounded),
             ),
           ),
           body: StreamBuilder(
-            stream: Apis.getAllusers(),
-            builder: (context, snapshot) {
-              switch (snapshot.connectionState) {
-                // if data is loading
-                case ConnectionState.waiting:
-                case ConnectionState.none:
-                  return const Center(
-                    child: CircularProgressIndicator(),
-                  );
+              stream: Apis.getMyUsersId(),
 
-                // if some or all data is loaded then show it
-                case ConnectionState.active:
-                case ConnectionState.done:
-                  final data = snapshot.data?.docs;
+              // get id only of known users
+              builder: (context, snapshot) {
+                switch (snapshot.connectionState) {
+                  // if data is loading
+                  case ConnectionState.waiting:
+                  case ConnectionState.none:
 
-                  list =
-                      data?.map((e) => ChatUser.fromJson(e.data())).toList() ??
-                          [];
+                  // if some or all data is loaded then show it
+                  case ConnectionState.active:
+                  case ConnectionState.done:
+                    return StreamBuilder(
+                      stream: Apis.getAllusers(
+                          snapshot.data?.docs.map((e) => e.id).toList() ?? []),
 
-                  if (list.isNotEmpty) {
-                    return ListView.builder(
-                        physics: BouncingScrollPhysics(),
-                        itemCount:
-                            isSearching ? searchList.length : list.length,
-                        padding: EdgeInsets.only(top: mq.height * .01),
-                        itemBuilder: (context, index) {
-                          return ChatUserCard(
-                            user: isSearching ? searchList[index] : list[index],
-                          );
-                        });
-                  } else {
-                    return const Center(
-                      child: Text(
-                        "No Connections Found",
-                        style: TextStyle(fontSize: 20),
-                      ),
+                      // get only those users, who's ids are
+                      builder: (context, snapshot) {
+                        switch (snapshot.connectionState) {
+                          // if data is loading
+                          case ConnectionState.waiting:
+                          case ConnectionState.none:
+                            return const Center(
+                              child: CircularProgressIndicator(),
+                            );
+
+                          // if some or all data is loaded then show it
+                          case ConnectionState.active:
+                          case ConnectionState.done:
+                            final data = snapshot.data?.docs;
+
+                            list = data
+                                    ?.map((e) => ChatUser.fromJson(e.data()))
+                                    .toList() ??
+                                [];
+
+                            if (list.isNotEmpty) {
+                              return ListView.builder(
+                                  physics: BouncingScrollPhysics(),
+                                  itemCount: isSearching
+                                      ? searchList.length
+                                      : list.length,
+                                  padding:
+                                      EdgeInsets.only(top: mq.height * .01),
+                                  itemBuilder: (context, index) {
+                                    return ChatUserCard(
+                                      user: isSearching
+                                          ? searchList[index]
+                                          : list[index],
+                                    );
+                                  });
+                            } else {
+                              return const Center(
+                                child: Text(
+                                  "No Connections Found",
+                                  style: TextStyle(fontSize: 20),
+                                ),
+                              );
+                            }
+                        }
+                      },
                     );
-                  }
-              }
-            },
-          ),
+                }
+              }),
         ),
       ),
     );
+  }
+
+  //dialog for updating message content
+  void addChatUserDialog() {
+    String email = '';
+
+    showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+              contentPadding: const EdgeInsets.only(
+                  left: 24, right: 24, top: 20, bottom: 10),
+
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20)),
+
+              //title
+              title: Row(
+                children: const [
+                  Icon(
+                    Icons.person,
+                    color: Colors.blue,
+                    size: 28,
+                  ),
+                  Text(' Add User')
+                ],
+              ),
+
+              //content
+              content: TextFormField(
+                maxLines: null,
+                onChanged: (value) => email = value,
+                decoration: InputDecoration(
+                    hintText: "Email Id",
+                    prefixIcon: const Icon(
+                      Icons.email_rounded,
+                      color: Colors.blue,
+                    ),
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(15))),
+              ),
+
+              //actions
+              actions: [
+                //cancel button
+                MaterialButton(
+                    onPressed: () {
+                      //hide alert dialog
+                      Navigator.pop(context);
+                    },
+                    child: const Text(
+                      'Cancel',
+                      style: TextStyle(color: Colors.blue, fontSize: 16),
+                    )),
+
+                //add user button
+                MaterialButton(
+                    onPressed: () async {
+                      //hide alert dialog
+                      Navigator.pop(context);
+                      if (email.isNotEmpty) {
+                        await Apis.addChatUser(email).then((value) => {
+                              if (!value)
+                                {
+                                  Dialogs.showSnackbar(
+                                      context, 'User does not exists')
+                                }
+                            });
+                      }
+                    },
+                    child: const Text(
+                      'Add',
+                      style: TextStyle(color: Colors.blue, fontSize: 16),
+                    ))
+              ],
+            ));
   }
 }

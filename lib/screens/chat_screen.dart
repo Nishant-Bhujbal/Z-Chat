@@ -153,7 +153,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   builder: (_) => ViewProfileScreen(user: widget.user)));
         },
         child: StreamBuilder(
-          stream: Apis.getAllusers(),
+          stream: Apis.getUserInfo(widget.user),
           builder: (context, snapshot) {
             final data = snapshot.data?.docs;
             final list =
@@ -320,8 +320,16 @@ class _ChatScreenState extends State<ChatScreen> {
         MaterialButton(
           onPressed: () {
             if (textController.text.isNotEmpty) {
+              if(list.isEmpty){
+              // on first message (add user to my_user collection of that user)
+              Apis.sendFirstMessage(widget.user, textController.text, Type.text);
+              textController.text = '';
+              }
+              else{
+              // simply send message
               Apis.sendMessage(widget.user, textController.text, Type.text);
               textController.text = '';
+              }
             }
           },
           minWidth: 0,
